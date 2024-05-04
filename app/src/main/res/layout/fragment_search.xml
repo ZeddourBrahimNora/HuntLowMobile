@@ -3,10 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Ajout ici de tt ce qui est lié a l'api pr la recherche etc.. -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recherche de Produits"
-        android:layout_gravity="center" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="56dp">
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:hint="Tapez le nom du produit" />
+
+        <Button
+            android:id="@+id/searchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rechercher"
+            android:layout_below="@id/searchEditText" />
+
+        <ListView
+            android:id="@+id/listViewProducts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/searchButton" />
+    </RelativeLayout>
+
+
+
 </FrameLayout>
