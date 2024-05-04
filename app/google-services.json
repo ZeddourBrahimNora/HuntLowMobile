@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437522104261",
+    "project_id": "huntlow-45bcd",
+    "storage_bucket": "huntlow-45bcd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437522104261:android:6653381a88e1434d3955ac",
+        "android_client_info": {
+          "package_name": "com.example.huntlow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBM3iXkO9fQjELUBfrJJJkCmYp5YDm5OyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
