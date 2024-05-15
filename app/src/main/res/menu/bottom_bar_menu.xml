@@ -3,7 +3,6 @@
         android:id="@+id/navigation_search"
         android:icon="@drawable/baseline_search_24"
         android:title="Recherche" />
-
     <item
         android:id="@+id/navigation_groups"
         android:icon="@drawable/baseline_groups_24"
@@ -12,5 +11,4 @@
         android:id="@+id/navigation_map"
         android:icon="@drawable/baseline_map_24"
         android:title="Carte" />
-
 </menu>

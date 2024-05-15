@@ -1,18 +1,107 @@
 package com.example.huntlow;
 
-import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroupsFragment extends Fragment {
 
+    private EditText groupNameEditText;
+    private EditText targetProductEditText;
+    private Button createGroupButton;
+    private RecyclerView groupsRecyclerView;
+    private GroupAdapter groupAdapter;
+    private List<Group> groupList;
+
+    private DatabaseReference db;
+
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_groups, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_groups, container, false);
+
+        groupNameEditText = view.findViewById(R.id.groupNameEditText);
+        targetProductEditText = view.findViewById(R.id.targetProductEditText);
+        createGroupButton = view.findViewById(R.id.createGroupButton);
+        groupsRecyclerView = view.findViewById(R.id.groupsRecyclerView);
+
+        db = FirebaseDatabase.getInstance().getReference();
+
+        groupList = new ArrayList<>();
+        groupAdapter = new GroupAdapter(groupList, this::joinGroup);
+        groupsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        groupsRecyclerView.setAdapter(groupAdapter);
+
+        createGroupButton.setOnClickListener(v -> createGroup());
+
+        loadGroups();
+
+        return view;
     }
 
-    
+    private void createGroup() {
+        String groupName = groupNameEditText.getText().toString().trim();
+        String targetProduct = targetProductEditText.getText().toString().trim();
+
+        if (groupName.isEmpty() || targetProduct.isEmpty()) {
+            Toast.makeText(getActivity(), "Please fill out all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String groupId = db.child("groups").push().getKey();
+
+        Group newGroup = new Group(groupId, groupName, targetProduct, new ArrayList<String>());
+
+        db.child("groups").child(groupId).setValue(newGroup)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getActivity(), "Group created successfully", Toast.LENGTH_SHORT).show();
+                    groupNameEditText.setText("");
+                    targetProductEditText.setText("");
+                    loadGroups();
+                })
+                .addOnFailureListener(e -> Toast.makeText(getActivity(), "Error creating group", Toast.LENGTH_SHORT).show());
+    }
+
+    private void loadGroups() {
+        db.child("groups").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                groupList.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Group group = snapshot.getValue(Group.class);
+                    groupList.add(group);
+                }
+                groupAdapter.setGroups(groupList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), "Error loading groups", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void joinGroup(String groupId) {
+        // Implémentez votre logique pour rejoindre un groupe ici, si nécessaire.
+        Toast.makeText(getActivity(), "Joined group successfully", Toast.LENGTH_SHORT).show();
+    }
 }

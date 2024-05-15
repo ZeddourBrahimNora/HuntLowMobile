@@ -6,13 +6,22 @@ import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
+
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this);
+
+        auth = FirebaseAuth.getInstance();
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavView);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -37,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.navigation_groups) {
                     selectedFragment = new GroupsFragment();
                 }
-
 
                 if (selectedFragment != null) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,
