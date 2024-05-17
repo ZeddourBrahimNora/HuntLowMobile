@@ -101,7 +101,13 @@ public class GroupsFragment extends Fragment {
     }
 
     private void joinGroup(String groupId) {
-        // Implémentez votre logique pour rejoindre un groupe ici, si nécessaire.
-        Toast.makeText(getActivity(), "Joined group successfully", Toast.LENGTH_SHORT).show();
+        ChatroomFragment chatroomFragment = new ChatroomFragment();
+        Bundle args = new Bundle();
+        args.putString("groupId", groupId);
+        chatroomFragment.setArguments(args);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frameLayout, chatroomFragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
