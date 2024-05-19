@@ -1,7 +1,6 @@
 package com.example.huntlow;
 
 public class Message {
-    private String senderId;
     private String username;
     private String messageText;
 
@@ -9,18 +8,9 @@ public class Message {
         // Default constructor required for calls to DataSnapshot.getValue(Message.class)
     }
 
-    public Message(String senderId, String username, String messageText) {
-        this.senderId = senderId;
+    public Message(String username, String messageText) {
         this.username = username;
         this.messageText = messageText;
-    }
-
-    public String getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
     }
 
     public String getUsername() {

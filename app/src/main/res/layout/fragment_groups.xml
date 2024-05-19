@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    tools:context=".GroupsFragment">
 
-    <!-- Section pour la création de groupes -->
     <EditText
         android:id="@+id/groupNameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nom du groupe"
-        android:layout_marginBottom="8dp" />
+        android:hint="Group Name" />
 
     <EditText
         android:id="@+id/targetProductEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Produit cible"
-        android:layout_marginBottom="8dp" />
+        android:hint="Target Product" />
 
     <Button
         android:id="@+id/createGroupButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Créer le groupe"
-        android:layout_marginBottom="16dp" />
+        android:text="Create Group" />
 
-    <!-- Section pour lister les groupes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/groupsRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
+        android:layout_height="wrap_content" />
 </LinearLayout>

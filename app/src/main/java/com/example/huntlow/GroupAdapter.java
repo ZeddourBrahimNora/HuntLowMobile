@@ -12,32 +12,32 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHolder> {
-
     private List<Group> groupList;
-    private OnItemClickListener listener;
+    private OnJoinClickListener onJoinClickListener;
 
-    public interface OnItemClickListener {
-        void onItemClick(String groupId);
+    public interface OnJoinClickListener {
+        void onJoinClick(String groupId);
     }
 
-    public GroupAdapter(List<Group> groupList, OnItemClickListener listener) {
+    public GroupAdapter(List<Group> groupList, OnJoinClickListener onJoinClickListener) {
         this.groupList = groupList;
-        this.listener = listener;
+        this.onJoinClickListener = onJoinClickListener;
     }
 
     @NonNull
     @Override
     public GroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_item, parent, false);
-        return new GroupViewHolder(itemView);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.group_item, parent, false);
+        return new GroupViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull GroupViewHolder holder, int position) {
         Group group = groupList.get(position);
-        holder.groupNameTextView.setText(group.getName());
-        holder.targetProductTextView.setText(group.getTargetProduct());
-        holder.joinButton.setOnClickListener(v -> listener.onItemClick(group.getId()));
+        holder.groupName.setText(group.getGroupName());
+        holder.targetProduct.setText(group.getTargetProduct());
+
+        holder.joinButton.setOnClickListener(v -> onJoinClickListener.onJoinClick(group.getGroupId()));
     }
 
     @Override
@@ -45,21 +45,21 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         return groupList.size();
     }
 
+    public static class GroupViewHolder extends RecyclerView.ViewHolder {
+        public TextView groupName;
+        public TextView targetProduct;
+        public Button joinButton;
+
+        public GroupViewHolder(@NonNull View itemView) {
+            super(itemView);
+            groupName = itemView.findViewById(R.id.groupNameTextView);
+            targetProduct = itemView.findViewById(R.id.targetProductTextView);
+            joinButton = itemView.findViewById(R.id.joinButton);
+        }
+    }
+
     public void setGroups(List<Group> groups) {
         this.groupList = groups;
         notifyDataSetChanged();
-    }
-
-    public static class GroupViewHolder extends RecyclerView.ViewHolder {
-        public TextView groupNameTextView;
-        public TextView targetProductTextView;
-        public Button joinButton;
-
-        public GroupViewHolder(View itemView) {
-            super(itemView);
-            groupNameTextView = itemView.findViewById(R.id.groupNameTextView);
-            targetProductTextView = itemView.findViewById(R.id.targetProductTextView);
-            joinButton = itemView.findViewById(R.id.joinButton);
-        }
     }
 }

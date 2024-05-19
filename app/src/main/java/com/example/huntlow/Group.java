@@ -8,8 +8,9 @@ public class Group {
     private String targetProduct;
     private List<String> members;
 
-    // Constructeur par défaut requis pour Firebase
-    public Group() {}
+    public Group() {
+        // Default constructor required for calls to DataSnapshot.getValue(Group.class)
+    }
 
     public Group(String id, String name, String targetProduct, List<String> members) {
         this.id = id;
@@ -18,7 +19,6 @@ public class Group {
         this.members = members;
     }
 
-    // Getters et Setters
     public String getId() {
         return id;
     }
@@ -49,5 +49,13 @@ public class Group {
 
     public void setMembers(List<String> members) {
         this.members = members;
+    }
+
+    public String getGroupId() {
+        return id;
+    }
+
+    public String getGroupName() {
+        return name;
     }
 }

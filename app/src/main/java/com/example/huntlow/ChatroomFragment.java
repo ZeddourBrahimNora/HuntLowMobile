@@ -1,7 +1,5 @@
 package com.example.huntlow;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +32,7 @@ public class ChatroomFragment extends Fragment {
     private List<Message> messageList;
     private DatabaseReference messagesRef;
     private String currentUsername;
+    private String groupId;
 
     @Nullable
     @Override
@@ -49,11 +48,27 @@ public class ChatroomFragment extends Fragment {
         messageAdapter = new MessageAdapter(messageList);
         recyclerViewMessages.setAdapter(messageAdapter);
 
-        messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+        // Récupérer les arguments du bundle
+        if (getArguments() != null) {
+            groupId = getArguments().getString("groupId");
+        }
 
-        // Retrieve username from SharedPreferences
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        currentUsername = sharedPreferences.getString("username", "Unknown");
+        // Vérifier que l'ID de groupe n'est pas null
+        if (groupId == null) {
+            Toast.makeText(getActivity(), "Group ID is null", Toast.LENGTH_SHORT).show();
+            return view;
+        }
+
+        // Récupérer le nom d'utilisateur actuel depuis l'activité principale
+        currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
+
+        // Vérifier que le nom d'utilisateur n'est pas null
+        if (currentUsername == null) {
+            Toast.makeText(getActivity(), "Username is null", Toast.LENGTH_SHORT).show();
+            return view;
+        }
+
+        messagesRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId).child("messages");
 
         buttonSendMessage.setOnClickListener(v -> sendMessage());
 
@@ -65,9 +80,8 @@ public class ChatroomFragment extends Fragment {
     private void sendMessage() {
         String messageText = editTextMessage.getText().toString().trim();
         if (!messageText.isEmpty()) {
-            String currentUserId = currentUsername;
+            Message message = new Message(currentUsername, messageText);
 
-            Message message = new Message(currentUserId, currentUsername, messageText);
             messagesRef.push().setValue(message).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     editTextMessage.setText("");
