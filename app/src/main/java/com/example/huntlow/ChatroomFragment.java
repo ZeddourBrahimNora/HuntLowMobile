@@ -1,5 +1,7 @@
 package com.example.huntlow;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +33,7 @@ public class ChatroomFragment extends Fragment {
     private MessageAdapter messageAdapter;
     private List<Message> messageList;
     private DatabaseReference messagesRef;
+    private String currentUsername;
 
     @Nullable
     @Override
@@ -48,6 +51,10 @@ public class ChatroomFragment extends Fragment {
 
         messagesRef = FirebaseDatabase.getInstance().getReference("messages");
 
+        // Retrieve username from SharedPreferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        currentUsername = sharedPreferences.getString("username", "Unknown");
+
         buttonSendMessage.setOnClickListener(v -> sendMessage());
 
         loadMessages();
@@ -58,8 +65,9 @@ public class ChatroomFragment extends Fragment {
     private void sendMessage() {
         String messageText = editTextMessage.getText().toString().trim();
         if (!messageText.isEmpty()) {
-            Message message = new Message("User ID", messageText); // Remplacez "User ID" par l'ID de l'utilisateur actuel
+            String currentUserId = currentUsername;
 
+            Message message = new Message(currentUserId, currentUsername, messageText);
             messagesRef.push().setValue(message).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     editTextMessage.setText("");

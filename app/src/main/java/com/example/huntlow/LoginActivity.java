@@ -3,7 +3,9 @@ package com.example.huntlow;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -96,11 +98,16 @@ public class LoginActivity extends AppCompatActivity {
                         String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
                         String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
 
+                        // Store user data in SharedPreferences
+                        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("name", nameFromDB);
+                        editor.putString("email", emailFromDB);
+                        editor.putString("username", usernameFromDB);
+                        editor.putString("password", passwordFromDB);
+                        editor.apply();
+
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra("name", nameFromDB);
-                        intent.putExtra("email", emailFromDB);
-                        intent.putExtra("username", usernameFromDB);
-                        intent.putExtra("password", passwordFromDB);
                         startActivity(intent);
                         finish(); // Terminate LoginActivity so that user cannot navigate back to it
                     } else {
