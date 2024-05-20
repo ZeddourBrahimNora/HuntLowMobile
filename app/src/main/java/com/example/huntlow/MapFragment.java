@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,7 +27,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private String groupId;
-
+    private TextView textViewBanner;
     private static final LatLng BELGIUM_COORDINATES = new LatLng(50.8503, 4.3517); // Coordinates for Belgium
 
     @Nullable
@@ -39,8 +40,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
+        textViewBanner = view.findViewById(R.id.textViewBanner);
+
         if (getArguments() != null) {
             groupId = getArguments().getString("groupId");
+            loadGroupInfo();
         }
 
         return view;
@@ -59,6 +63,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         // Set a map click listener
         mMap.setOnMapClickListener(latLng -> addMarker(latLng));
+    }
+
+    private void loadGroupInfo() {
+        DatabaseReference groupRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId);
+        groupRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Group group = snapshot.getValue(Group.class);
+                    if (group != null) {
+                        String bannerText = "Marquez l'emplacement du produit '" + group.getTargetProduct() + "' le moins cher que vous avez trouvé ici !";
+                        textViewBanner.setText(bannerText);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getActivity(), "Erreur lors du chargement des informations du groupe", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadMarkers() {
