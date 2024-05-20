@@ -16,8 +16,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -51,8 +54,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Center the map on Belgium
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BELGIUM_COORDINATES, 8));
 
+        // Load existing markers from Firebase
+        loadMarkers();
+
         // Set a map click listener
         mMap.setOnMapClickListener(latLng -> addMarker(latLng));
+    }
+
+    private void loadMarkers() {
+        DatabaseReference markersRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId).child("markers");
+        markersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mMap.clear(); // Clear the map before adding new markers
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    MarkerData markerData = snapshot.getValue(MarkerData.class);
+                    if (markerData != null) {
+                        LatLng position = new LatLng(markerData.latitude, markerData.longitude);
+                        mMap.addMarker(new MarkerOptions().position(position).title("Produit trouvé ici"));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), "Erreur lors du chargement des marqueurs", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void addMarker(LatLng markerLocation) {
