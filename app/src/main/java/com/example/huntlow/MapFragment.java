@@ -1,36 +1,28 @@
 package com.example.huntlow;
 
-import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationClient;
-    private Button buttonAddMarker;
     private String groupId;
-    private String targetProduct;
 
     private static final LatLng BELGIUM_COORDINATES = new LatLng(50.8503, 4.3517); // Coordinates for Belgium
 
@@ -44,14 +36,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        buttonAddMarker = view.findViewById(R.id.buttonAddMarker);
-        buttonAddMarker.setOnClickListener(v -> addMarker());
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
         if (getArguments() != null) {
             groupId = getArguments().getString("groupId");
-            targetProduct = getArguments().getString("targetProduct");
         }
 
         return view;
@@ -65,28 +51,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Center the map on Belgium
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BELGIUM_COORDINATES, 8));
 
-        // Optionally, zoom to the user's current location if available
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(getActivity(), location -> {
-                    if (location != null) {
-                        LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
-                    }
-                });
+        // Set a map click listener
+        mMap.setOnMapClickListener(latLng -> addMarker(latLng));
     }
 
-    private void addMarker() {
+    private void addMarker(LatLng markerLocation) {
         if (mMap != null) {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(getActivity(), location -> {
-                        if (location != null) {
-                            LatLng markerLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                            mMap.addMarker(new MarkerOptions().position(markerLocation).title("Produit trouvé ici"));
-                            saveMarkerToDatabase(markerLocation);
-                        } else {
-                            Toast.makeText(getActivity(), "Impossible d'obtenir la localisation", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            mMap.addMarker(new MarkerOptions().position(markerLocation).title("Produit trouvé ici"));
+            saveMarkerToDatabase(markerLocation);
         }
     }
 
