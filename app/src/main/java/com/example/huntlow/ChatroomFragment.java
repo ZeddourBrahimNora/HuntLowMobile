@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,10 +29,10 @@ public class ChatroomFragment extends Fragment {
     private RecyclerView recyclerViewMessages;
     private EditText editTextMessage;
     private Button buttonSendMessage;
+    private TextView textViewWelcome;
     private MessageAdapter messageAdapter;
     private List<Message> messageList;
     private DatabaseReference messagesRef;
-    private String currentUsername;
     private String groupId;
 
     @Nullable
@@ -42,37 +43,31 @@ public class ChatroomFragment extends Fragment {
         recyclerViewMessages = view.findViewById(R.id.recyclerViewMessages);
         editTextMessage = view.findViewById(R.id.editTextMessage);
         buttonSendMessage = view.findViewById(R.id.buttonSendMessage);
+        textViewWelcome = view.findViewById(R.id.textViewWelcome);
 
         recyclerViewMessages.setLayoutManager(new LinearLayoutManager(getActivity()));
         messageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(messageList);
         recyclerViewMessages.setAdapter(messageAdapter);
 
-        // Récupérer les arguments du bundle
+        // Récupérer le groupId depuis les arguments
         if (getArguments() != null) {
             groupId = getArguments().getString("groupId");
-        }
-
-        // Vérifier que l'ID de groupe n'est pas null
-        if (groupId == null) {
-            Toast.makeText(getActivity(), "Group ID is null", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "Group ID is null", Toast.LENGTH_SHORT).show();
             return view;
         }
 
-        // Récupérer le nom d'utilisateur actuel depuis l'activité principale
-        currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
+        // Référence de la chatroom spécifique au groupe
+        messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);
 
-        // Vérifier que le nom d'utilisateur n'est pas null
-        if (currentUsername == null) {
-            Toast.makeText(getActivity(), "Username is null", Toast.LENGTH_SHORT).show();
-            return view;
-        }
+        // Charger les messages
+        loadMessages();
 
-        messagesRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId).child("messages");
+        // Charger les informations du groupe
+        loadGroupInfo();
 
         buttonSendMessage.setOnClickListener(v -> sendMessage());
-
-        loadMessages();
 
         return view;
     }
@@ -80,6 +75,7 @@ public class ChatroomFragment extends Fragment {
     private void sendMessage() {
         String messageText = editTextMessage.getText().toString().trim();
         if (!messageText.isEmpty()) {
+            String currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
             Message message = new Message(currentUsername, messageText);
 
             messagesRef.push().setValue(message).addOnCompleteListener(task -> {
@@ -110,6 +106,26 @@ public class ChatroomFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 // Handle possible errors
+            }
+        });
+    }
+
+    private void loadGroupInfo() {
+        DatabaseReference groupRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId);
+        groupRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Group group = snapshot.getValue(Group.class);
+                    if (group != null) {
+                        textViewWelcome.setText("Bienvenue dans le groupe: " + group.getGroupName() + "\nObjectif: Trouver le produit '" + group.getTargetProduct() + "' au prix le plus bas possible !");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load group info", Toast.LENGTH_SHORT).show();
             }
         });
     }
