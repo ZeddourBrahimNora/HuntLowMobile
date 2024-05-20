@@ -35,6 +35,12 @@ public class ChatroomFragment extends Fragment {
     private DatabaseReference messagesRef;
     private String groupId;
 
+    private Button buttonOpenMap;
+
+    private String targetProduct;
+
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -44,6 +50,8 @@ public class ChatroomFragment extends Fragment {
         editTextMessage = view.findViewById(R.id.editTextMessage);
         buttonSendMessage = view.findViewById(R.id.buttonSendMessage);
         textViewWelcome = view.findViewById(R.id.textViewWelcome);
+        buttonOpenMap = view.findViewById(R.id.buttonOpenMap);
+
 
         recyclerViewMessages.setLayoutManager(new LinearLayoutManager(getActivity()));
         messageList = new ArrayList<>();
@@ -53,6 +61,7 @@ public class ChatroomFragment extends Fragment {
         // Récupérer le groupId depuis les arguments
         if (getArguments() != null) {
             groupId = getArguments().getString("groupId");
+            targetProduct = getArguments().getString("targetProduct");
         } else {
             Toast.makeText(getContext(), "Group ID is null", Toast.LENGTH_SHORT).show();
             return view;
@@ -68,6 +77,9 @@ public class ChatroomFragment extends Fragment {
         loadGroupInfo();
 
         buttonSendMessage.setOnClickListener(v -> sendMessage());
+
+        buttonOpenMap.setOnClickListener(v -> openMapFragment());
+
 
         return view;
     }
@@ -128,5 +140,18 @@ public class ChatroomFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load group info", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void openMapFragment() {
+        MapFragment mapFragment = new MapFragment();
+        Bundle args = new Bundle();
+        args.putString("groupId", groupId);
+        args.putString("targetProduct", targetProduct);
+        mapFragment.setArguments(args);
+
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frameLayout, mapFragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
