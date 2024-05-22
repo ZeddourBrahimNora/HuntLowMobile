@@ -1,9 +1,11 @@
 package com.example.huntlow;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +64,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         loadMarkers();
 
         // Set a map click listener
-        mMap.setOnMapClickListener(latLng -> addMarker(latLng));
+        mMap.setOnMapClickListener(latLng -> showAddMarkerDialog(latLng));
     }
 
     private void loadGroupInfo() {
@@ -96,7 +98,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     MarkerData markerData = snapshot.getValue(MarkerData.class);
                     if (markerData != null) {
                         LatLng position = new LatLng(markerData.latitude, markerData.longitude);
-                        mMap.addMarker(new MarkerOptions().position(position).title("Produit trouvé ici"));
+                        mMap.addMarker(new MarkerOptions().position(position).title(markerData.text));
                     }
                 }
             }
@@ -108,17 +110,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private void addMarker(LatLng markerLocation) {
+    private void showAddMarkerDialog(LatLng markerLocation) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Ajouter un marqueur");
+
+        final EditText input = new EditText(getActivity());
+        input.setHint("Entrez le prix du produit");
+        builder.setView(input);
+
+        builder.setPositiveButton("Ajouter", (dialog, which) -> {
+            String markerText = input.getText().toString();
+            if (!markerText.isEmpty()) {
+                addMarker(markerLocation, markerText);
+            } else {
+                Toast.makeText(getActivity(), "Le texte du marqueur ne peut pas être vide", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Annuler", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    private void addMarker(LatLng markerLocation, String markerText) {
         if (mMap != null) {
-            mMap.addMarker(new MarkerOptions().position(markerLocation).title("Produit trouvé ici"));
-            saveMarkerToDatabase(markerLocation);
+            mMap.addMarker(new MarkerOptions().position(markerLocation).title(markerText));
+            saveMarkerToDatabase(markerLocation, markerText);
         }
     }
 
-    private void saveMarkerToDatabase(LatLng location) {
+    private void saveMarkerToDatabase(LatLng location, String text) {
         DatabaseReference markersRef = FirebaseDatabase.getInstance().getReference("groups").child(groupId).child("markers");
         String markerId = markersRef.push().getKey();
-        MarkerData markerData = new MarkerData(markerId, location.latitude, location.longitude);
+        MarkerData markerData = new MarkerData(markerId, location.latitude, location.longitude, text);
         markersRef.child(markerId).setValue(markerData)
                 .addOnSuccessListener(aVoid -> Toast.makeText(getActivity(), "Marqueur ajouté", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(getActivity(), "Erreur lors de l'ajout du marqueur", Toast.LENGTH_SHORT).show());
@@ -128,15 +152,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         public String id;
         public double latitude;
         public double longitude;
+        public String text;
 
         public MarkerData() {
             // Default constructor required for calls to DataSnapshot.getValue(MarkerData.class)
         }
 
-        public MarkerData(String id, double latitude, double longitude) {
+        public MarkerData(String id, double latitude, double longitude, String text) {
             this.id = id;
             this.latitude = latitude;
             this.longitude = longitude;
+            this.text = text;
         }
     }
 }
