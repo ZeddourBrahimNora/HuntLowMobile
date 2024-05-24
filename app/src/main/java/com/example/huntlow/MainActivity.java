@@ -31,11 +31,10 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavView);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        // Pour charger le premier fragment par défaut (Recherche de produits)
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout,
                     new SearchFragment()).commit();
-            bottomNav.setSelectedItemId(R.id.navigation_search); // Mettez en surbrillance l'icône de recherche par défaut
+            bottomNav.setSelectedItemId(R.id.navigation_search);
         }
     }
     public String getCurrentUsername() {
@@ -48,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 if (id == R.id.navigation_search) {
                     selectedFragment = new SearchFragment();
-                } else if (id == R.id.navigation_map) {
-                    selectedFragment = new MapFragment();
                 } else if (id == R.id.navigation_groups) {
                     selectedFragment = new GroupsFragment();
                 }

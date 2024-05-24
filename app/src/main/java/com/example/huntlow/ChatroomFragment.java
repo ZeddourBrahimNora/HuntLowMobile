@@ -70,10 +70,8 @@ public class ChatroomFragment extends Fragment {
         // Référence de la chatroom spécifique au groupe
         messagesRef = FirebaseDatabase.getInstance().getReference("messages").child(groupId);
 
-        // Charger les messages
         loadMessages();
 
-        // Charger les informations du groupe
         loadGroupInfo();
 
         buttonSendMessage.setOnClickListener(v -> sendMessage());

@@ -9,7 +9,6 @@ public class Group {
     private List<String> members;
 
     public Group() {
-        // Default constructor required for calls to DataSnapshot.getValue(Group.class)
     }
 
     public Group(String id, String name, String targetProduct, List<String> members) {

@@ -30,7 +30,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;
     private String groupId;
     private TextView textViewBanner;
-    private static final LatLng BELGIUM_COORDINATES = new LatLng(50.8503, 4.3517); // Coordinates for Belgium
+    private static final LatLng BELGIUM_COORDINATES = new LatLng(50.8503, 4.3517);
 
     @Nullable
     @Override
@@ -57,13 +57,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // Center the map on Belgium
+        // Centrer la map sur la belgique par défaut
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BELGIUM_COORDINATES, 8));
 
-        // Load existing markers from Firebase
+        // Pour charger les marqueurs existant dans la bdd
         loadMarkers();
 
-        // Set a map click listener
         mMap.setOnMapClickListener(latLng -> showAddMarkerDialog(latLng));
     }
 
@@ -123,7 +122,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (!markerText.isEmpty()) {
                 addMarker(markerLocation, markerText);
             } else {
-                Toast.makeText(getActivity(), "Le texte du marqueur ne peut pas être vide", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Le texte du marqueur ne peut pas être vide, veuillez entrez un prix", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -155,7 +154,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         public String text;
 
         public MarkerData() {
-            // Default constructor required for calls to DataSnapshot.getValue(MarkerData.class)
         }
 
         public MarkerData(String id, double latitude, double longitude, String text) {

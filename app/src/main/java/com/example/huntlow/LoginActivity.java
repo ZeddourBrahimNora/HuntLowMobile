@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                         intent.putExtra("username", usernameFromDB);
                         intent.putExtra("password", passwordFromDB);
                         startActivity(intent);
-                        finish(); // Terminate LoginActivity so that user cannot navigate back to it
+                        finish();
                     } else {
                         loginPassword.setError("Invalid Credentials");
                         loginPassword.requestFocus();
@@ -109,7 +109,6 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle possible errors.
             }
         });
     }

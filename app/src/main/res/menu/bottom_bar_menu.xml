@@ -7,8 +7,5 @@
         android:id="@+id/navigation_groups"
         android:icon="@drawable/baseline_groups_24"
         android:title="Groupes" />
-    <item
-        android:id="@+id/navigation_map"
-        android:icon="@drawable/baseline_map_24"
-        android:title="Carte" />
+
 </menu>

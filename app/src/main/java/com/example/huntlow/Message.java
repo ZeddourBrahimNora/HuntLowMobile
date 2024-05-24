@@ -5,7 +5,6 @@ public class Message {
     private String messageText;
 
     public Message() {
-        // Default constructor required for calls to DataSnapshot.getValue(Message.class)
     }
 
     public Message(String username, String messageText) {
