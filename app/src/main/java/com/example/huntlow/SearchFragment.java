@@ -28,6 +28,7 @@ public class SearchFragment extends Fragment {
     private EditText editTextSearch;
     private Button buttonSearch;
     private ArrayList<String> productNames;
+    private ArrayList<String> nutriScores; // Ajouté
 
     @Nullable
     @Override
@@ -41,11 +42,13 @@ public class SearchFragment extends Fragment {
 
         if (savedInstanceState != null) {
             productNames = savedInstanceState.getStringArrayList("productNames");
-            if (productNames != null) {
-                updateListView(productNames);
+            nutriScores = savedInstanceState.getStringArrayList("nutriScores"); // Ajouté
+            if (productNames != null && nutriScores != null) {
+                updateListView(productNames, nutriScores);
             }
         } else {
             productNames = new ArrayList<>();
+            nutriScores = new ArrayList<>(); // Ajouté
         }
 
         buttonSearch.setOnClickListener(new View.OnClickListener() {
@@ -65,6 +68,7 @@ public class SearchFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList("productNames", productNames);
+        outState.putStringArrayList("nutriScores", nutriScores); // Ajouté
     }
 
     void searchProductsByName(String productName) {
@@ -98,19 +102,26 @@ public class SearchFragment extends Fragment {
             JSONObject jsonObject = new JSONObject(jsonData);
             JSONArray products = jsonObject.getJSONArray("products");
             productNames.clear();
+            nutriScores.clear(); // Ajouté
             for (int i = 0; i < products.length(); i++) {
                 JSONObject product = products.getJSONObject(i);
                 String productName = product.getString("product_name");
+                String nutriScore = product.optString("nutriscore_grade", "N/A"); // Ajouté
                 productNames.add(productName);
+                nutriScores.add(nutriScore); // Ajouté
             }
-            updateListView(productNames);
+            updateListView(productNames, nutriScores); // Modifié
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void updateListView(ArrayList<String> productNames) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, productNames);
+    private void updateListView(ArrayList<String> productNames, ArrayList<String> nutriScores) {
+        ArrayList<String> displayList = new ArrayList<>();
+        for (int i = 0; i < productNames.size(); i++) {
+            displayList.add(productNames.get(i) + " - Nutri-Score: " + nutriScores.get(i)); // Ajouté
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, displayList);
         listViewProducts.setAdapter(adapter);
     }
 }
