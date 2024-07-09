@@ -1,6 +1,7 @@
 package com.example.huntlow;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class SearchFragment extends Fragment {
 
@@ -31,6 +33,8 @@ public class SearchFragment extends Fragment {
     private ArrayList<String> nutriScores;
     private ArrayList<String> productImages;
     private ProductAdapter productAdapter;
+
+    private static final String TAG = "SearchFragment";
 
     @Nullable
     @Override
@@ -80,7 +84,12 @@ public class SearchFragment extends Fragment {
     }
 
     void searchProductsByName(String productName) {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
+
         String url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" + productName + "&search_simple=1&action=process&json=true";
 
         Request request = new Request.Builder()
@@ -90,7 +99,13 @@ public class SearchFragment extends Fragment {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Request Failed", e);
+                if (e instanceof java.net.SocketTimeoutException) {
+                    Log.e(TAG, "Connection timed out. Retrying...");
+                    searchProductsByName(productName); // Retry logic
+                } else {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -100,6 +115,8 @@ public class SearchFragment extends Fragment {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(() -> updateUI(myResponse));
                     }
+                } else {
+                    Log.e(TAG, "Response not successful: " + response.code());
                 }
             }
         });
