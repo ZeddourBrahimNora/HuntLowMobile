@@ -32,6 +32,8 @@ public class ProfileFragment extends Fragment {
 
     private TextView textUsername;
     private BarChart barChart;
+    private List<BarEntry> entries;
+    private List<String> labels;
 
     @Nullable
     @Override
@@ -49,6 +51,10 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+    public void onOrientationChanged() {
+        setupChart();
+    }
+
     private void fetchAppOpenData() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(userId);
@@ -56,8 +62,8 @@ public class ProfileFragment extends Fragment {
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<BarEntry> entries = new ArrayList<>();
-                List<String> labels = new ArrayList<>();
+                entries = new ArrayList<>();
+                labels = new ArrayList<>();
                 int index = 0;
 
                 for (DataSnapshot dateSnapshot : snapshot.getChildren()) {
@@ -68,23 +74,7 @@ public class ProfileFragment extends Fragment {
                     index++;
                 }
 
-                BarDataSet dataSet = new BarDataSet(entries, "App Opens");
-                dataSet.setColor(Color.BLUE);
-                BarData barData = new BarData(dataSet);
-                barChart.setData(barData);
-
-                XAxis xAxis = barChart.getXAxis();
-                xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                xAxis.setGranularity(1f);
-                xAxis.setGranularityEnabled(true);
-
-                YAxis leftAxis = barChart.getAxisLeft();
-                leftAxis.setGranularity(1f);
-                leftAxis.setGranularityEnabled(true);
-
-                barChart.getAxisRight().setEnabled(false);
-                barChart.invalidate(); // Refresh the chart
+                setupChart();
             }
 
             @Override
@@ -92,5 +82,38 @@ public class ProfileFragment extends Fragment {
                 // Handle possible errors.
             }
         });
+    }
+
+    private void setupChart() {
+        if (entries == null || labels == null) return;
+
+        BarDataSet dataSet = new BarDataSet(entries, "Nombre d'ouvertures");
+        dataSet.setColor(Color.BLUE);
+        BarData barData = new BarData(dataSet);
+        barData.setValueTextColor(Color.BLACK);
+        barData.setValueTextSize(12f);
+
+        barChart.setData(barData);
+
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setTextColor(Color.BLACK);
+        xAxis.setTextSize(12f);
+
+        YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setGranularity(1f);
+        leftAxis.setGranularityEnabled(true);
+        leftAxis.setTextColor(Color.BLACK);
+        leftAxis.setTextSize(12f);
+
+        barChart.getAxisRight().setEnabled(false);
+        barChart.getLegend().setTextColor(Color.BLACK);
+        barChart.getLegend().setTextSize(12f);
+        barChart.setBackgroundColor(Color.WHITE);
+
+        barChart.invalidate(); // Refresh the chart
     }
 }
