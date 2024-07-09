@@ -3,7 +3,6 @@ package com.example.huntlow;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -37,9 +36,11 @@ public class MainActivity extends AppCompatActivity {
             bottomNav.setSelectedItemId(R.id.navigation_search);
         }
     }
+
     public String getCurrentUsername() {
         return currentUsername;
     }
+
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             item -> {
                 Fragment selectedFragment = null;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = new SearchFragment();
                 } else if (id == R.id.navigation_groups) {
                     selectedFragment = new GroupsFragment();
+                } else if (id == R.id.navigation_profile) {  // Ajout de l'item de navigation pour le profil
+                    selectedFragment = new ProfileFragment();
                 }
 
                 if (selectedFragment != null) {
