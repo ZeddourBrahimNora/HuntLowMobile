@@ -3,6 +3,7 @@ package com.example.huntlow;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = new SearchFragment();
                 } else if (id == R.id.navigation_groups) {
                     selectedFragment = new GroupsFragment();
-                } else if (id == R.id.navigation_profile) {  // Ajout de l'item de navigation pour le profil
+                } else if (id == R.id.navigation_profile) {
                     selectedFragment = new ProfileFragment();
                 }
 
