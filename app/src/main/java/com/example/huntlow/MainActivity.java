@@ -11,6 +11,16 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
         if (getIntent().hasExtra("username")) {
             currentUsername = getIntent().getStringExtra("username");
         }
+
+        // Enregistrement de l'ouverture de l'application
+        recordAppOpen();
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavView);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
@@ -72,5 +85,32 @@ public class MainActivity extends AppCompatActivity {
         if (currentFragment instanceof ProfileFragment) {
             ((ProfileFragment) currentFragment).onOrientationChanged();
         }
+    }
+
+    private void recordAppOpen() {
+        String userId = auth.getCurrentUser().getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(userId);
+
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        DatabaseReference dateRef = userRef.child(currentDate);
+
+        dateRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Long currentCount = mutableData.getValue(Long.class);
+                if (currentCount == null) {
+                    mutableData.setValue(1);
+                } else {
+                    mutableData.setValue(currentCount + 1);
+                }
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot dataSnapshot) {
+                // Transaction complete
+            }
+        });
     }
 }
