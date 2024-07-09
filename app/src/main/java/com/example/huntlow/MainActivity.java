@@ -11,12 +11,8 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,9 +36,6 @@ public class MainActivity extends AppCompatActivity {
             currentUsername = getIntent().getStringExtra("username");
         }
 
-        // Enregistrement de l'ouverture de l'application
-        recordAppOpen();
-
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavView);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
@@ -51,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
                     new SearchFragment()).commit();
             bottomNav.setSelectedItemId(R.id.navigation_search);
         }
+
+        incrementAppOpenCount();
     }
 
     public String getCurrentUsername() {
@@ -78,6 +73,23 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             };
 
+    private void incrementAppOpenCount() {
+        String username = getCurrentUsername();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(username);
+
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        DatabaseReference dateRef = userRef.child(currentDate);
+
+        dateRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                long count = task.getResult().getValue(Long.class);
+                dateRef.setValue(count + 1);
+            } else {
+                dateRef.setValue(1);
+            }
+        });
+    }
+
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -85,32 +97,5 @@ public class MainActivity extends AppCompatActivity {
         if (currentFragment instanceof ProfileFragment) {
             ((ProfileFragment) currentFragment).onOrientationChanged();
         }
-    }
-
-    private void recordAppOpen() {
-        String userId = auth.getCurrentUser().getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(userId);
-
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference dateRef = userRef.child(currentDate);
-
-        dateRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                Long currentCount = mutableData.getValue(Long.class);
-                if (currentCount == null) {
-                    mutableData.setValue(1);
-                } else {
-                    mutableData.setValue(currentCount + 1);
-                }
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot dataSnapshot) {
-                // Transaction complete
-            }
-        });
     }
 }

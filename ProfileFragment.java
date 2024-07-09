@@ -56,8 +56,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void fetchAppOpenData() {
-        String username = ((MainActivity) getActivity()).getCurrentUsername();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(username);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(userId);
 
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
