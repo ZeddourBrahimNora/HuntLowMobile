@@ -16,11 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GroupsFragment extends Fragment {
@@ -87,8 +90,28 @@ public class GroupsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 groupList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Group group = snapshot.getValue(Group.class);
-                    groupList.add(group);
+                    try {
+                        Group group = snapshot.getValue(Group.class);
+                        if (group != null) {
+                            groupList.add(group);
+                        } else {
+                            GenericTypeIndicator<HashMap<String, Object>> t = new GenericTypeIndicator<HashMap<String, Object>>() {};
+                            HashMap<String, Object> map = snapshot.getValue(t);
+                            if (map != null) {
+                                String id = (String) map.get("id");
+                                String name = (String) map.get("name");
+                                String targetProduct = (String) map.get("targetProduct");
+                                List<String> members = new ArrayList<>();
+                                if (map.get("members") instanceof List) {
+                                    members = (List<String>) map.get("members");
+                                }
+                                Group newGroup = new Group(id, name, targetProduct, members);
+                                groupList.add(newGroup);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 groupAdapter.setGroups(groupList);
             }
@@ -99,6 +122,8 @@ public class GroupsFragment extends Fragment {
             }
         });
     }
+
+
 
     private void joinGroup(String groupId) {
         ChatroomFragment chatroomFragment = new ChatroomFragment();
