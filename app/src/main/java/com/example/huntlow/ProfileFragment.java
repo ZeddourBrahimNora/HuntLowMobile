@@ -44,7 +44,8 @@ public class ProfileFragment extends Fragment {
         barChart = view.findViewById(R.id.bar_chart);
 
         String currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
-        textUsername.setText(currentUsername);
+        textUsername.setText(currentUsername + "'s profile");
+        textUsername.setTextSize(24); // Augmente la taille de la police
 
         fetchAppOpenData();
 
