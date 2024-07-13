@@ -42,15 +42,14 @@ public class ProfileFragment extends Fragment {
         textUsername = view.findViewById(R.id.text_username);
         barChart = view.findViewById(R.id.bar_chart);
 
-        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
 
         String currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
         textUsername.setText(currentUsername + "'s profile");
         textUsername.setTextSize(24); // Augmente la taille de la police
 
-        if (!viewModel.isInitialized()) {
+        if (viewModel.getEntries() == null || viewModel.getLabels() == null) {
             fetchAppOpenData();
-            viewModel.setInitialized(true);
         } else {
             setupChart();
         }
