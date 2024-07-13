@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -18,7 +19,6 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,8 +32,7 @@ public class ProfileFragment extends Fragment {
 
     private TextView textUsername;
     private BarChart barChart;
-    private List<BarEntry> entries;
-    private List<String> labels;
+    private ProfileViewModel viewModel;
 
     @Nullable
     @Override
@@ -43,11 +42,18 @@ public class ProfileFragment extends Fragment {
         textUsername = view.findViewById(R.id.text_username);
         barChart = view.findViewById(R.id.bar_chart);
 
+        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+
         String currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
         textUsername.setText(currentUsername + "'s profile");
         textUsername.setTextSize(24); // Augmente la taille de la police
 
-        fetchAppOpenData();
+        if (!viewModel.isInitialized()) {
+            fetchAppOpenData();
+            viewModel.setInitialized(true);
+        } else {
+            setupChart();
+        }
 
         return view;
     }
@@ -63,8 +69,8 @@ public class ProfileFragment extends Fragment {
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                entries = new ArrayList<>();
-                labels = new ArrayList<>();
+                List<BarEntry> entries = new ArrayList<>();
+                List<String> labels = new ArrayList<>();
                 int index = 0;
 
                 for (DataSnapshot dateSnapshot : snapshot.getChildren()) {
@@ -75,6 +81,8 @@ public class ProfileFragment extends Fragment {
                     index++;
                 }
 
+                viewModel.setEntries(entries);
+                viewModel.setLabels(labels);
                 setupChart();
             }
 
@@ -86,6 +94,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupChart() {
+        List<BarEntry> entries = viewModel.getEntries();
+        List<String> labels = viewModel.getLabels();
+
         if (entries == null || labels == null) return;
 
         BarDataSet dataSet = new BarDataSet(entries, "Nombre d'ouvertures");

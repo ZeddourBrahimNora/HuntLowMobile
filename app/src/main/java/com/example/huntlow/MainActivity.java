@@ -1,12 +1,14 @@
 package com.example.huntlow;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.FirebaseApp;
@@ -22,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private String currentUsername;
+    private ProfileViewModel viewModel;
+    private boolean isAppOpened = false;
+    private boolean isChangingConfigurations = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
 
         auth = FirebaseAuth.getInstance();
+
+        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         if (getIntent().hasExtra("username")) {
             currentUsername = getIntent().getStringExtra("username");
@@ -45,7 +52,9 @@ public class MainActivity extends AppCompatActivity {
             bottomNav.setSelectedItemId(R.id.navigation_search);
         }
 
-        incrementAppOpenCount();
+        if (!viewModel.isInitialized()) {
+            viewModel.setInitialized(true);
+        }
     }
 
     public String getCurrentUsername() {
@@ -74,28 +83,55 @@ public class MainActivity extends AppCompatActivity {
             };
 
     private void incrementAppOpenCount() {
-        String username = getCurrentUsername();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(username);
+        SharedPreferences prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String lastOpenedDate = prefs.getString("last_opened_date", "");
 
         String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        DatabaseReference dateRef = userRef.child(currentDate);
 
-        dateRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult().exists()) {
-                long count = task.getResult().getValue(Long.class);
-                dateRef.setValue(count + 1);
-            } else {
-                dateRef.setValue(1);
-            }
-        });
+        // Incrémentez le compteur seulement si l'application n'a pas été ouverte aujourd'hui
+        if (!currentDate.equals(lastOpenedDate)) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("last_opened_date", currentDate);
+            editor.apply();
+
+            String username = getCurrentUsername();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("appOpens").child(username);
+            DatabaseReference dateRef = userRef.child(currentDate);
+
+            dateRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult().exists()) {
+                    long count = task.getResult().getValue(Long.class);
+                    dateRef.setValue(count + 1);
+                } else {
+                    dateRef.setValue(1);
+                }
+            });
+        }
     }
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        isChangingConfigurations = true;
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frameLayout);
         if (currentFragment instanceof ProfileFragment) {
             ((ProfileFragment) currentFragment).onOrientationChanged();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isChangingConfigurations) {
+            incrementAppOpenCount();
+        }
+        isAppOpened = true;
+        isChangingConfigurations = false; // Reset the flag after configuration change
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isAppOpened = false; // Reset the flag when the activity is paused
     }
 }
