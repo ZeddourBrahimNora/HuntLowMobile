@@ -92,7 +92,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         markersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mMap.clear(); // Clear the map before adding new markers
+                mMap.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     MarkerData markerData = snapshot.getValue(MarkerData.class);
                     if (markerData != null) {

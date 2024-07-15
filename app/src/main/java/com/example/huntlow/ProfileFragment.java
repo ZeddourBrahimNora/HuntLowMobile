@@ -46,7 +46,7 @@ public class ProfileFragment extends Fragment {
 
         String currentUsername = ((MainActivity) getActivity()).getCurrentUsername();
         textUsername.setText(currentUsername + "'s profile");
-        textUsername.setTextSize(24); // Augmente la taille de la police
+        textUsername.setTextSize(24);
 
         if (viewModel.getEntries() == null || viewModel.getLabels() == null) {
             fetchAppOpenData();

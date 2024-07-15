@@ -102,7 +102,7 @@ public class SearchFragment extends Fragment {
                 Log.e(TAG, "Request Failed", e);
                 if (e instanceof java.net.SocketTimeoutException) {
                     Log.e(TAG, "Connection timed out. Retrying...");
-                    searchProductsByName(productName); // Retry logic
+                    searchProductsByName(productName);
                 } else {
                     e.printStackTrace();
                 }
